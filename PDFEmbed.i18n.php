@@ -25,9 +25,11 @@ if ( !function_exists( 'wfJsonI18nShim3c31c114726db32d' ) ) {
 				}
 				$cachedData['messages'] = array_merge( $data, $cachedData['messages'] );
 			}
+
 			$cachedData['deps'][] = new FileDependency( $fileName );
 		}
 		return true;
 	}
+
 	$GLOBALS['wgHooks']['LocalisationCacheRecache'][] = 'wfJsonI18nShim3c31c114726db32d';
 }

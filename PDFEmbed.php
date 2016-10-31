@@ -9,6 +9,7 @@
  * @link		http://www.mediawiki.org/wiki/Extension:PDFEmbed
  *
  **/
+
 /******************************************/
 /* Credits								  */
 /******************************************/
@@ -21,18 +22,27 @@ $credits = [
 	'version'			=> '1.1.2'
 ];
 $wgExtensionCredits['parserhook'][] = $credits;
+
+
 /******************************************/
 /* Language Strings, Page Aliases, Hooks  */
 /******************************************/
 $extDir = __DIR__;
+
 $wgAvailableRights[] = 'embed_pdf';
+
 $wgExtensionMessagesFiles['PDFEmbed']		= "{$extDir}/PDFEmbed.i18n.php";
 $wgMessagesDirs['PDFEmbed']					= "{$extDir}/i18n";
+
 $wgAutoloadClasses['PDFEmbed']				= "{$extDir}/PDFEmbed.hooks.php";
 $wgAutoloadClasses['PDFHandler']			= "{$extDir}/classes/PDFHandler.class.php";
+
 $wgHooks['ParserFirstCallInit'][] = 'PDFEmbed::onParserFirstCallInit';
+
 //Future
 //$wgMediaHandlers['application/pdf'] = 'PDFHandler';
+
+
 /******************************************/
 /* Initialize Settings                    */
 /******************************************/
@@ -41,13 +51,16 @@ $wgHooks['ParserFirstCallInit'][] = 'PDFEmbed::onParserFirstCallInit';
 if (!array_key_exists('embed_pdf', $wgGroupPermissions['sysop'])) {
 	$wgGroupPermissions['sysop']['embed_pdf'] = true;
 }
+
 //Add the PDF file extension into the allowed list.
 if (!in_array('pdf', $wgFileExtensions)) {
 	$wgFileExtensions[] = 'pdf';
 }
+
 if (!isset($pdfEmbed['width'])) {
 	$pdfEmbed['width'] = 800;
 }
+
 if (!isset($pdfEmbed['height'])) {
 	$pdfEmbed['height'] = 1090;
 }

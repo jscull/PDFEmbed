@@ -1,7 +1,7 @@
 <?php
 /**
  * PDFEmbed
- * PDFEmbed Hooks
+ * PDFHandler Media Handler Class
  *
  * @author		Alexia E. Smith
  * @license		LGPLv3 http://opensource.org/licenses/lgpl-3.0.html
@@ -10,7 +10,7 @@
  *
  **/
 
-class PDFEmbed {
+class PDFHandler {
 	/**
 	 * Sets up this extensions parser functions.
 	 *
@@ -35,69 +35,46 @@ class PDFEmbed {
 	 * @return	string	HTML
 	 */
 	static public function generateTag($file, $args = [], Parser $parser, PPFrame $frame) {
-		global $pdfEmbed, $wgRequest, $wgUser;
+		global $pdfEmbed, $wgUser;
 		$parser->disableCache();
 
-		if (strstr($file, '{{{') !== false) {
-			$file = $parser->recursiveTagParse($file, $frame);
-		}
-
-		if ($wgRequest->getVal('action') == 'edit' || $wgRequest->getVal('action') == 'submit') {
-			$user = $wgUser;
-		} else {
-			$user = User::newFromName($parser->getRevisionUser());
-		}
-
-		if ($user === false) {
-			return self::error('embed_pdf_invalid_user');
-		}
-
-		if (!$user->isAllowed('embed_pdf')) {
+		if (!$wgUser->isAllowed('pdf')) {
 			return self::error('embed_pdf_no_permission');
 		}
 
-		if (empty($file) || !preg_match('#(.+?)\.pdf#is', $file)) {
+		if (empty($file)) {
 			return self::error('embed_pdf_blank_file');
 		}
 
 		$file = wfFindFile(Title::newFromText($file));
 
-		$width  = (array_key_exists('width', $args) ? intval($args['width']) : intval($pdfEmbed['width']));
-		$height = (array_key_exists('height', $args) ? intval($args['height']) : intval($pdfEmbed['height']));
-		$page = (array_key_exists('page', $args) ? intval($args['page']) : 1);
+		$width  = ($args['width'] > 0 ? intval($args['width']) : intval($pdfEmbed['width']));
+		$height = ($args['height'] > 0 ? intval($args['height']) : intval($pdfEmbed['height']));
 
 		if ($file !== false) {
-			return self::embed($file, $width, $height, $page);
+			return self::embed($file, $width, $height);
 		} else {
 			return self::error('embed_pdf_invalid_file');
 		}
 	}
 
 	/**
-	 * Returns a HTML object as string.
+	 * Returns a standard error message.
 	 *
-	 * @access	private
+	 * @access	public
 	 * @param	object	File object.
 	 * @param	integer	Width of the object.
 	 * @param	integer	Height of the object.
 	 * @return	string	HTML object.
 	 */
-	static private function embed(File $file, $width, $height, $page) {
-		return Html::rawElement('object', [
-				'width' => $width,
-				'height' => $height,
-				'data' => $file->getFullUrl().'#page='.$page,
-				'type' => 'application/pdf'
-			],
-			wfMessage('pdf_not_supported', $file->getFullUrl(), $file->getName())->escaped()
-			."<param name='page' value='$page' />"
-		);
+	static private function embed(File $file, $width, $height) {
+		return "<object width='{$width}' height='{$height}' data='".urlencode($file->getFullUrl())." type='application/pdf'></object>";
 	}
 
 	/**
 	 * Returns a standard error message.
 	 *
-	 * @access	private
+	 * @access	public
 	 * @param	string	Error message key to display.
 	 * @return	string	HTML error message.
 	 */
